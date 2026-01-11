@@ -1,0 +1,33 @@
+{
+  "name": "myslice-launcher",
+  "version": "1.0.0",
+  "description": "Hidden protocol handler for mysliceLTS://",
+  "main": "main.js",
+  "author": "Your Name",
+  "license": "MIT",
+
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --dir"
+  },
+
+  "devDependencies": {
+    "electron": "^31.3.1",
+    "electron-builder": "^25.0.5"
+  },
+
+  "build": {
+    "appId": "com.mysliceLTS.launcher",
+    "productName": "mysliceLTS",
+
+    "win": {
+      "target": "dir",
+      "icon": "icon.ico"
+    },
+
+    "files": [
+      "main.js",
+      "myslice.ps1"
+    ]
+  }
+}

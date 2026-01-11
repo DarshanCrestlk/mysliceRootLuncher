@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
+  <Id>7ac86ae0-404b-43c2-b9d9-e6c178dc4b94</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>myslice</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="myslice" />
+  <Description DefaultValue="A template to get started." />
+  <IconUrl
+    DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/icon-32.png" />
+  <HighResolutionIconUrl
+    DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/icon-64.png" />
+  <SupportUrl DefaultValue="https://www.contoso.com/help" />
+  <AppDomains>
+    <AppDomain> https://dev-api.slicehr.com</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Document" />
+  </Hosts>
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="SharedRuntime" MinVersion="1.1" />
+    </Sets>
+  </Requirements>
+  <DefaultSettings>
+    <SourceLocation
+      DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/taskpane.html" />
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+    xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <Runtimes>
+          <Runtime resid="SharedRuntime.Url" lifetime="long"   />
+        </Runtimes>
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="SharedRuntime.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <CustomTab id="TabHome">
+              <!-- <Group id="CompareGroup">
+                <Label resid="CompareGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Compare.16x16" />
+                  <bt:Image size="32" resid="Compare.32x32" />
+                  <bt:Image size="80" resid="Compare.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="Compare">
+                  <Label resid="Compare.Label" />
+                  <Supertip>
+                    <Title resid="Compare.Label" />
+                    <Description resid="Compare.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Compare.16x16" />
+                    <bt:Image size="32" resid="Compare.32x32" />
+                    <bt:Image size="80" resid="Compare.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Compare.Url" />
+                  </Action>
+                </Control>
+              </Group> -->
+              <Group id="SaveAsNewVersionGroup">
+                <Label resid="SaveAsNewVersionGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="SaveAsNewVersion.16x16" />
+                  <bt:Image size="32" resid="SaveAsNewVersion.32x32" />
+                  <bt:Image size="80" resid="SaveAsNewVersion.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="SaveAsNewVersion">
+                  <Label resid="SaveAsNewVersion.Label" />
+                  <Supertip>
+                    <Title resid="SaveAsNewVersion.Label" />
+                    <Description resid="SaveAsNewVersion.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="SaveAsNewVersion.16x16" />
+                    <bt:Image size="32" resid="SaveAsNewVersion.32x32" />
+                    <bt:Image size="80" resid="SaveAsNewVersion.80x80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>saveAsNewVersionButton</FunctionName>
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+              <Group id="SaveAsGroup">
+                <Label resid="SaveAsGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="SaveAs.16x16" />
+                  <bt:Image size="32" resid="SaveAs.32x32" />
+                  <bt:Image size="80" resid="SaveAs.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="SaveAs">
+                  <Label resid="SaveAs.Label" />
+                  <Supertip>
+                    <Title resid="SaveAs.Label" />
+                    <Description resid="SaveAs.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="SaveAs.16x16" />
+                    <bt:Image size="32" resid="SaveAs.32x32" />
+                    <bt:Image size="80" resid="SaveAs.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="SaveAs.Url" />
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+              <Group id="CloseGroup">
+                <Label resid="CloseGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Close.16x16" />
+                  <bt:Image size="32" resid="Close.32x32" />
+                  <bt:Image size="80" resid="Close.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="Close">
+                  <Label resid="Close.Label" />
+                  <Supertip>
+                    <Title resid="Close.Label" />
+                    <Description resid="Close.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Close.16x16" />
+                    <bt:Image size="32" resid="Close.32x32" />
+                    <bt:Image size="80" resid="Close.80x80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>unlockAndCloseButton</FunctionName>
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+              <Label resid="SliceHRMSGroup.Label" />
+            </CustomTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+      <Host xsi:type="Workbook">
+        <Runtimes>
+          <Runtime resid="SharedRuntime.Url" lifetime="long"   />
+        </Runtimes>
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="SharedRuntime.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <CustomTab id="TabHome">
+              <!-- Save As New Version -->
+              <Group id="SaveAsNewVersionGroup">
+                <Label resid="SaveAsNewVersionGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="SaveAsNewVersion.16x16" />
+                  <bt:Image size="32" resid="SaveAsNewVersion.32x32" />
+                  <bt:Image size="80" resid="SaveAsNewVersion.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="SaveAsNewVersion">
+                  <Label resid="SaveAsNewVersion.Label" />
+                  <Supertip>
+                    <Title resid="SaveAsNewVersion.Label" />
+                    <Description resid="SaveAsNewVersion.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="SaveAsNewVersion.16x16" />
+                    <bt:Image size="32" resid="SaveAsNewVersion.32x32" />
+                    <bt:Image size="80" resid="SaveAsNewVersion.80x80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>saveAsNewVersionButton</FunctionName>
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+
+              <!-- Save As -->
+              <Group id="SaveAsGroup">
+                <Label resid="SaveAsGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="SaveAs.16x16" />
+                  <bt:Image size="32" resid="SaveAs.32x32" />
+                  <bt:Image size="80" resid="SaveAs.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="SaveAs">
+                  <Label resid="SaveAs.Label" />
+                  <Supertip>
+                    <Title resid="SaveAs.Label" />
+                    <Description resid="SaveAs.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="SaveAs.16x16" />
+                    <bt:Image size="32" resid="SaveAs.32x32" />
+                    <bt:Image size="80" resid="SaveAs.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="SaveAs.Url" />
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+
+              <!-- Close -->
+              <Group id="CloseGroup">
+                <Label resid="CloseGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Close.16x16" />
+                  <bt:Image size="32" resid="Close.32x32" />
+                  <bt:Image size="80" resid="Close.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="Close">
+                  <Label resid="Close.Label" />
+                  <Supertip>
+                    <Title resid="Close.Label" />
+                    <Description resid="Close.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Close.16x16" />
+                    <bt:Image size="32" resid="Close.32x32" />
+                    <bt:Image size="80" resid="Close.80x80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>unlockAndCloseButton</FunctionName>
+                  </Action>
+                  <Enabled>true</Enabled>
+                </Control>
+              </Group>
+
+              <Label resid="SliceHRMSGroup.Label" />
+            </CustomTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+
+        <bt:Image id="SaveAsNewVersion.16x16"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-clsoe.png" />
+        <bt:Image id="SaveAsNewVersion.32x32"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-clsoe.png" />
+        <bt:Image id="SaveAsNewVersion.80x80"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-clsoe.png" />
+
+        <bt:Image id="SaveAs.16x16"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-as-new.png" />
+        <bt:Image id="SaveAs.32x32"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-as-new.png" />
+        <bt:Image id="SaveAs.80x80"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/save-as-new.png" />
+
+        <!-- <bt:Image id="Compare.16x16"
+        DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/compare.png"
+        />
+        <bt:Image id="Compare.32x32"
+        DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/compare.png"
+        />
+        <bt:Image id="Compare.80x80"
+        DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/compare.png"
+        /> -->
+
+        <bt:Image id="Close.16x16"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/delete-sign.png" />
+        <bt:Image id="Close.32x32"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/delete-sign.png" />
+        <bt:Image id="Close.80x80"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/delete-sign.png" />
+
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="GetStarted.LearnMoreUrl"
+          DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812" />
+       
+        <bt:Url id="SharedRuntime.Url"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/taskpane.html" />
+        <bt:Url id="SaveAs.Url"
+          DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/taskpane.html?taskpaneId=SaveAsTaskpane" />
+      
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Welcome" />
+        <bt:String id="SliceHRMSGroup.Label" DefaultValue="myslice" />
+        <bt:String id="SaveAsNewVersionGroup.Label" DefaultValue="Save &amp; Close" />
+        <bt:String id="SaveAsGroup.Label" DefaultValue=" Save As New File" />
+        <!-- <bt:String id="CompareGroup.Label" DefaultValue="Compare" /> -->
+        <bt:String id="CloseGroup.Label" DefaultValue="Discard &amp; Close" />
+        <bt:String id="SaveAsNewVersion.Label" DefaultValue="Save &amp; Close" />
+        <bt:String id="SaveAs.Label" DefaultValue="Save As New File" />
+        <!-- <bt:String id="Compare.Label" DefaultValue="Compare Version" /> -->
+        <bt:String id="Close.Label" DefaultValue="Discard &amp; Close" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="myslice Document Library" />
+        <bt:String id="SaveAsNewVersion.Tooltip"
+          DefaultValue="Save on myslice and generate new version and close the application." />
+        <bt:String id="SaveAs.Tooltip"
+          DefaultValue="Save As the new File on myslice and close the application." />
+        <!-- <bt:String id="Compare.Tooltip" DefaultValue="Compare the file with versions." /> -->
+        <bt:String id="Close.Tooltip"
+          DefaultValue="Discard the changes and unlock the file and close the application." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
