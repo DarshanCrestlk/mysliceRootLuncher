@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
+console.log("Starting officeLuncher setup...");
 // ---------------- CONFIG ----------------
 const BASE_DIR = path.join(process.env.PROGRAMDATA, "myslice", "mysliceLTS");
 const MANIFEST_DIR = path.join(BASE_DIR, "manifest");
