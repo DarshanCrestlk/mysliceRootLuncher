@@ -12,14 +12,15 @@
   },
   "build": {
     "appId": "com.yourcompany.myslice.installer",
-    "productName": "MySlice LTS",
+    "productName": "MySlice",
     "directories": {
       "output": "dist"
     },
     "defaultArch": "x64",
     "win": {
       "target": "nsis",
-      "requestedExecutionLevel": "requireAdministrator"
+      "requestedExecutionLevel": "requireAdministrator",
+       "icon": "myslice.png"
     },
     "nsis": {
       "oneClick": true,

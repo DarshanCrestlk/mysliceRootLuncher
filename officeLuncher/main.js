@@ -134,7 +134,6 @@ Write-Output "Trusted catalog registration attempted (check regedit under Polici
   return runTempPS(embeddedPS, "Trusted catalog registration failed");
 }
 
-
 // ---------------- CUSTOM PROTOCOL ----------------
 function addCustomUrlProtocol() {
   const exePath = MYSLICE_EXE_TARGET;
@@ -203,12 +202,7 @@ app.whenReady().then(() => {
       type: "info",
       title: "MySlice LTS – Setup Complete",
       message:
-        "All steps completed successfully.\n\n" +
-        "• Files deployed\n" +
-        "• Network share ready\n" +
-        "• Office trust enabled\n" +
-        "• Protocol registered\n\n" +
-        "Your app should now work!",
+        "MySlice LTS setup complete. You can now use the MySlice LTS protocol to open MySlice LTS in Office.",
     });
   } else {
     dialog.showErrorBox(
