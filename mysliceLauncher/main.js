@@ -5,7 +5,7 @@ const path = require('path');
 
 const PROTOCOL = 'mysliceLTS';
 // const PS_SCRIPT_PATH = 'D:\\mysliceLauncher\\myslice.ps1'; // Update if needed
-const PS_SCRIPT_PATH = 'C:\\ProgramData\\myslice\\mysliceLTS\\myslice.ps1'; // Update if needed
+const PS_SCRIPT_PATH = 'C:\\ProgramData\\myslice\\mysliceLTS\\launcher\\resources\\myslice.ps1'; // Update if needed
 
 let isQuitting = false;
 

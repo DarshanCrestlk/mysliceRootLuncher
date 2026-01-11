@@ -24,10 +24,15 @@
       "target": "dir",
       "icon": "icon.ico"
     },
+    "extraResources": [
+      {
+        "from": "myslice.ps1",
+        "to": "myslice.ps1"
+      }
+    ],
 
     "files": [
-      "main.js",
-      "myslice.ps1"
+      "main.js"
     ]
   }
 }

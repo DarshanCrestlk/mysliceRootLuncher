@@ -22,13 +22,12 @@
       "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
       "perMachine": true,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": false,
+      "allowElevation": false,
       "runAfterFinish": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false
     },
     "extraResources": [
       {
