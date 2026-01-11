@@ -115,24 +115,25 @@ Set-Acl $folderPath $acl
 function addRegistryTrustedCatalog() {
   const embeddedPS = `
 $desktopName = $env:COMPUTERNAME
-
+$shareName = "mysliceLTS"
+$guid = "c77550fc-0d50-495e-be1a-8695539e5d54"
 $regContent = @"
 Windows Registry Editor Version 5.00
 
-[HKEY_CURRENT_USER\\\\Software\\\\Microsoft\\\\Office\\\\16.0\\\\WEF\\\\TrustedCatalogs\\\\{c77550fc-0d50-495e-be1a-8695539e5d54}]
-\\"Id\\"=\\"{c77550fc-0d50-495e-be1a-8695539e5d54}\\"
-\\"Url\\"=\\"\\\\\\\\$desktopName\\\\mysliceLTS\\"
-\\"Flags\\"=dword:00000001
+[HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Office\\16.0\\WEF\\TrustedCatalogs\\{$guid}]
+"Id"="{$guid}"
+"Url"="\\\\\\\\$desktopName\\\\$shareName"
+"Flags"=dword:00000001
 "@
-
-$regFilePath = "$env:TEMP\\MySlice_Trusted.reg"
-Set-Content -Path $regFilePath -Value $regContent -Encoding Unicode
-Start-Process regedit.exe -ArgumentList "/s", $regFilePath -Wait
-Remove-Item $regFilePath -Force
+$regFilePath = "$env:TEMP\\MySlice_Trusted_Catalog.reg"
+$regContent | Out-File -FilePath $regFilePath -Encoding Unicode -Force
+Start-Process regedit.exe -ArgumentList "/s", \`"$regFilePath\`" -Wait -NoNewWindow
+Remove-Item $regFilePath -Force -ErrorAction SilentlyContinue
+Write-Output "Trusted catalog registration attempted (check regedit under Policies branch)"
 `;
-
-  return runTempPS(embeddedPS, "Trusted catalog failed");
+  return runTempPS(embeddedPS, "Trusted catalog registration failed");
 }
+
 
 // ---------------- CUSTOM PROTOCOL ----------------
 function addCustomUrlProtocol() {
