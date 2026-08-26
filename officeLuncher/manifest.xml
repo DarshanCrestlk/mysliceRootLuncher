@@ -15,7 +15,8 @@
     DefaultValue="https://dev-slice-hrms.s3.us-east-2.amazonaws.com/SLICE+HRMS/images/myslice+Add+ins/dist/assets/icon-64.png" />
   <SupportUrl DefaultValue="https://www.contoso.com/help" />
   <AppDomains>
-    <AppDomain> https://dev-api.slicehr.com</AppDomain>
+    <!-- <AppDomain> https://dev-api.slicehr.com</AppDomain> -->
+    <AppDomain>https://dev-hrms-api.slicehr.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Document" />

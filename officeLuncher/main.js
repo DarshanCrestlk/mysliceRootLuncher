@@ -3,6 +3,7 @@ const { execFileSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const { removeMySlice } = require("./cleanup");
 
 console.log("Starting officeLuncher setup...");
 // ---------------- CONFIG ----------------
@@ -178,8 +179,56 @@ function runTempPS(script, errorMsg) {
   }
 }
 
+function wantsUninstall() {
+  return process.argv.some(
+    (arg) => arg === "--uninstall" || arg === "/uninstall" || arg === "-uninstall"
+  );
+}
+
+function isSilent() {
+  return process.argv.some((arg) => arg === "--silent" || arg === "/S");
+}
+
 // ---------------- APP ENTRY ----------------
 app.whenReady().then(() => {
+  if (wantsUninstall()) {
+    if (!isSilent()) {
+      const choice = dialog.showMessageBoxSync(null, {
+        type: "warning",
+        title: "MySlice Uninstall",
+        message: "Remove MySlice from this PC?",
+        detail:
+          "This removes the launcher, mysliceLTS:// protocol, network share, Office catalog, and ProgramData files.",
+        buttons: ["Uninstall", "Cancel"],
+        defaultId: 1,
+        cancelId: 1,
+        noLink: true,
+      });
+      if (choice !== 0) {
+        app.quit();
+        return;
+      }
+    }
+
+    const { ok, failedSteps } = removeMySlice();
+    if (ok) {
+      dialog.showMessageBoxSync(null, {
+        type: "info",
+        title: "MySlice LTS – Uninstall Complete",
+        message: "MySlice was removed from this PC. Close Word/Excel if they are still open.",
+      });
+    } else {
+      dialog.showErrorBox(
+        "Uninstall Issue",
+        `Failed steps:\n• ${failedSteps.join(
+          "\n• "
+        )}\n\nRun as Administrator and close Word/Excel.`
+      );
+    }
+    app.quit();
+    return;
+  }
+
   console.log("MySlice LTS Installer – Starting setup...\n");
 
   const exeOk = setupMYSliceExe();

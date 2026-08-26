@@ -2,41 +2,109 @@ param (
     [string]$url
 )
 
-# Ensure URL starts with https://
+function Get-QueryValue {
+    param(
+        [string]$RawUrl,
+        [string]$Key
+    )
+    if ([string]::IsNullOrWhiteSpace($RawUrl)) { return $null }
+    $match = [regex]::Match($RawUrl, "[?&]$Key=([^?&]*)")
+    if (-not $match.Success) { return $null }
+    return [System.Net.WebUtility]::UrlDecode($match.Groups[1].Value.Trim())
+}
+
+function Get-DownloadUrl {
+    param([string]$RawUrl)
+    $download = $RawUrl
+    foreach ($key in @("ext", "file_id", "origin", "mode", "p")) {
+        $download = [regex]::Replace($download, "[?&]$key=[^?&]*", "")
+    }
+    return $download.TrimEnd("?", "&")
+}
+
+function Get-SafeBaseName {
+    param([string]$DownloadUrl)
+    $pathPart = $DownloadUrl
+    try {
+        $uri = [Uri]$DownloadUrl
+        if ($uri.IsAbsoluteUri) { $pathPart = $uri.AbsolutePath }
+    } catch {}
+
+    $leaf = [System.IO.Path]::GetFileNameWithoutExtension($pathPart)
+    if ($leaf) { $leaf = [System.Net.WebUtility]::UrlDecode($leaf) }
+    $leaf = ($leaf -replace "^\d+\.*", "").Trim()
+    foreach ($ch in [System.IO.Path]::GetInvalidFileNameChars()) {
+        if ($null -ne $leaf) { $leaf = $leaf.Replace([string]$ch, "") }
+    }
+    $leaf = $leaf -replace "\s+", "_"
+    if ([string]::IsNullOrWhiteSpace($leaf)) { $leaf = "document" }
+    if ($leaf.Length -gt 50) { $leaf = $leaf.Substring(0, 50) }
+    return $leaf
+}
+
+function Get-SafeSlug {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) { return $null }
+    $slug = $Value.Trim().ToLower()
+    if ($slug -notmatch '^[a-z0-9]+(-[a-z0-9]+)*$') { return $null }
+    return $slug
+}
+
+function Get-NewProcessId {
+    param(
+        [string]$Name,
+        [int[]]$ExistingIds
+    )
+    Start-Sleep -Milliseconds 800
+    try {
+        $all = @(Get-Process -Name $Name -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
+        $new = @($all | Where-Object { $ExistingIds -notcontains $_ })
+        if ($new.Count -gt 0) { return $new[0] }
+    } catch {}
+    return $null
+}
+
+function Remove-TempFileSafe {
+    param([string]$Path)
+    if ($Path -and (Test-Path $Path)) {
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+    }
+}
+
 if ($url -notmatch '^https://') {
     $url = $url -replace '^https//', 'https://'
 }
 
-# Extract file_id from the URL
-$fileId = ($url -split 'file_id=')[1] -split '\?end=' | Select-Object -First 1
-$ext = ($url -split 'ext=')[1] -split '\?file_id=' | Select-Object -First 1
-$permissions = ($url -split 'p=')[1] -split '\?ext=' | Select-Object -First 1
+$fileId = Get-QueryValue -RawUrl $url -Key 'file_id'
+$ext = Get-QueryValue -RawUrl $url -Key 'ext'
+$permissions = Get-QueryValue -RawUrl $url -Key 'p'
+$origin = Get-SafeSlug (Get-QueryValue -RawUrl $url -Key 'origin')
+$downloadUrl = Get-DownloadUrl $url
+$cleanedFileName = Get-SafeBaseName $downloadUrl
 
-Write-Host "---------------"$ext
-Write-Host "---------------"$permissions
+$meta = "$fileId+$(Get-Date -Format 'yyyyMMddHHmmss')"
+if ($origin) { $meta = "$meta+$origin" }
 
-# Extract the original filename from the URL and clean it up
-$originalFileName = [System.IO.Path]::GetFileName($url)
-$cleanedFileName = $originalFileName -replace '^\d+\.*', ''       # Remove numeric prefixes
-$cleanedFileName = $cleanedFileName -replace '\..*$', ''          # Remove everything after the first period
-$cleanedFileName = [System.Net.WebUtility]::UrlDecode($cleanedFileName.Trim())  # Decode URL-encoded characters and trim whitespace
-
-# Define the temp file path with cleaned filename and .docx extension
 if ($permissions) {
-    $tempFile = Join-Path -Path $env:TEMP -ChildPath "$cleanedFileName.$ext($fileId+$(Get-Date -Format 'yyyyMMddHHmmss')),$permissions"
-    Write-Host "------"$tempFile
+    $tempFile = Join-Path -Path $env:TEMP -ChildPath "$cleanedFileName.$ext($meta),$permissions"
 } else {
-    $tempFile = Join-Path -Path $env:TEMP -ChildPath "$cleanedFileName.$ext($fileId+$(Get-Date -Format 'yyyyMMddHHmmss'))"
+    $tempFile = Join-Path -Path $env:TEMP -ChildPath "$cleanedFileName.$ext($meta)"
 }
 
-# Download the file to a temporary location
-Invoke-WebRequest -Uri $url -OutFile $tempFile
+Write-Host "ext=$ext origin=$origin"
+Write-Host "downloadUrl=$downloadUrl"
+Write-Host "tempFile=$tempFile"
 
-# Word Document Processing
+Invoke-WebRequest -Uri $downloadUrl -OutFile $tempFile -UseBasicParsing
+
 if ($ext -eq "docx") {
-    # Create a new Word application object
+    $existingIds = @()
+    try { $existingIds = @(Get-Process -Name "WINWORD" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id) } catch {}
+
     $word = New-Object -ComObject Word.Application
     $word.Visible = $true
+    $wordPid = Get-NewProcessId -Name "WINWORD" -ExistingIds $existingIds
+    $document = $null
 
     try {
         $document = $word.Documents.Open($tempFile, [ref]$false, [ref]$false, [ref]$false)
@@ -44,168 +112,150 @@ if ($ext -eq "docx") {
         $selection.Font.Hidden = $true
         $selection.TypeText(" ")
 
-        Write-Host "Document is open in Word. Press Ctrl+C in the console to close the script."
-
-        while ($document.Windows.Count -gt 0) {
-            Start-Sleep -Milliseconds 100
-        }
-    }
-    catch {
-        Write-Host "An error occurred: $_"
-    }
-    finally {
-        try {
-            if ($document -ne $null -and $document.Windows.Count -gt 0) {
-                $document.Close($false)
+        while ($true) {
+            Start-Sleep -Milliseconds 200
+            try {
+                if ($document.Windows.Count -eq 0) { break }
+            } catch {
+                break
             }
-        } catch {
-            Write-Host "Document was already closed or disconnected."
         }
-
+    } catch {
+        Write-Host "Word error: $_"
+    } finally {
         try {
-            if ($word -ne $null -and $word.Visible -eq $true) {
-                $word.Quit()
+            if ($null -ne $document) {
+                try {
+                    if ($document.Windows.Count -gt 0) { $document.Close($false) }
+                } catch {}
             }
+        } catch {}
+
+        $shouldQuit = $false
+        try {
+            if ($null -ne $word -and $word.Documents.Count -eq 0) { $shouldQuit = $true }
         } catch {
-            Write-Host "Word was already closed or disconnected."
+            $shouldQuit = $true
         }
 
-        if (Test-Path $tempFile) {
-            Remove-Item $tempFile -Force
+        if ($shouldQuit) {
+            try { if ($null -ne $word) { $word.Quit() } } catch {}
+        } else {
+            Write-Host "Word still has other documents; not quitting this instance. pid=$wordPid"
         }
 
+        Remove-TempFileSafe $tempFile
         exit
     }
 }
 
-# Excel Workbook Processing - FIXED VERSION
 elseif ($ext -eq "xlsx") {
-    # Get existing Excel processes before starting
-    $existingProcesses = @()
-    try {
-        $existingProcesses = Get-Process -Name "EXCEL" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id
-    } catch {}
-    
+    $existingIds = @()
+    try { $existingIds = @(Get-Process -Name "EXCEL" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id) } catch {}
+
     $excel = New-Object -ComObject Excel.Application
     $excel.Visible = $true
     $excel.DisplayAlerts = $false
-    
+    $excelPid = Get-NewProcessId -Name "EXCEL" -ExistingIds $existingIds
     $workbook = $null
-    $newProcessId = $null
 
     try {
-        # Find the new Excel process
-        Start-Sleep -Milliseconds 1000
-        $allProcesses = Get-Process -Name "EXCEL" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id
-        $newProcesses = $allProcesses | Where-Object { $_ -notin $existingProcesses }
-        if ($newProcesses) {
-            $newProcessId = $newProcesses[0]
-            Write-Host "Excel process ID: $newProcessId"
-        }
-        
-        # Try opening the file
-        if (Test-Path $tempFile) {
-            $workbook = $excel.Workbooks.Open($tempFile)
-            Write-Host "Excel file opened successfully. Close Excel window to continue..."
-        } else {
-            Write-Host "Error: Temp file not found - $tempFile"
-            throw "File not found"
-        }
+        if (-not (Test-Path $tempFile)) { throw "Temp file not found - $tempFile" }
+        $workbook = $excel.Workbooks.Open($tempFile)
+        Write-Host "Excel opened pid=$excelPid"
 
-        # Wait for Excel to be closed - simplified approach
         while ($true) {
-            Start-Sleep -Milliseconds 500
+            Start-Sleep -Milliseconds 400
             try {
-                # Test if Excel COM object is still valid
-                $count = $excel.Workbooks.Count
-                if ($count -eq 0) {
-                    Write-Host "All workbooks closed."
-                    break
-                }
+                $null = $workbook.Name
+                if ($workbook.Windows.Count -eq 0) { break }
             } catch {
-                # Excel COM object is no longer valid (Excel was closed)
-                Write-Host "Excel was closed."
                 break
             }
         }
-
     } catch {
-        Write-Host "Error opening Excel file: $_"
+        Write-Host "Excel error: $_"
     } finally {
-        # Cleanup
-        Write-Host "Starting cleanup..."
-        
         try {
-            if ($workbook -ne $null) {
-                $workbook.Close($false)
-                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null
+            if ($null -ne $workbook) {
+                try { $workbook.Close($false) } catch {}
+                try { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null } catch {}
             }
+        } catch {}
+
+        $empty = $false
+        try {
+            if ($null -eq $excel -or $excel.Workbooks.Count -eq 0) { $empty = $true }
         } catch {
-            Write-Host "Workbook cleanup error: $_"
+            $empty = $true
         }
 
-        try {
-            if ($excel -ne $null) {
-                $excel.Quit()
-                [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
-            }
-        } catch {
-            Write-Host "Excel cleanup error: $_"
-        }
-
-        # Force garbage collection
-        [System.GC]::Collect()
-        [System.GC]::WaitForPendingFinalizers()
-        [System.GC]::Collect()
-        
-        # Kill the Excel process if still running
-        if ($newProcessId) {
-            Start-Sleep -Milliseconds 1000
+        if ($empty) {
             try {
-                $process = Get-Process -Id $newProcessId -ErrorAction SilentlyContinue
-                if ($process -and !$process.HasExited) {
-                    Write-Host "Force killing Excel process $newProcessId"
-                    Stop-Process -Id $newProcessId -Force
+                if ($null -ne $excel) {
+                    $excel.Quit()
+                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
                 }
-            } catch {
-                Write-Host "Process cleanup: $_"
+            } catch {}
+            [System.GC]::Collect()
+            [System.GC]::WaitForPendingFinalizers()
+
+            if ($excelPid) {
+                Start-Sleep -Milliseconds 800
+                try {
+                    $proc = Get-Process -Id $excelPid -ErrorAction SilentlyContinue
+                    if ($proc -and -not $proc.HasExited) {
+                        Stop-Process -Id $excelPid -Force -ErrorAction SilentlyContinue
+                    }
+                } catch {}
             }
+        } else {
+            Write-Host "Excel still has other workbooks; not quitting. pid=$excelPid"
         }
 
-        # Clean up temp file
-        if (Test-Path $tempFile) {
-            Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-        }
+        Remove-TempFileSafe $tempFile
+        exit
     }
-    
-    Write-Host "Excel processing completed."
-    exit
 }
 
-# PowerPoint Presentation Processing
 elseif ($ext -eq "pptx") {
+    $existingIds = @()
+    try { $existingIds = @(Get-Process -Name "POWERPNT" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id) } catch {}
+
     $powerpoint = New-Object -ComObject PowerPoint.Application
     $powerpoint.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue
+    $pptPid = Get-NewProcessId -Name "POWERPNT" -ExistingIds $existingIds
+    $presentation = $null
 
     try {
         $presentation = $powerpoint.Presentations.Open($tempFile, [Microsoft.Office.Core.MsoTriState]::msoFalse, [Microsoft.Office.Core.MsoTriState]::msoTrue, [Microsoft.Office.Core.MsoTriState]::msoTrue)
-
-        Write-Host "Presentation is open in PowerPoint. Press Ctrl+C in the console to close the script."
-
-        while ($presentation.Windows.Count -gt 0) {
-            Start-Sleep -Milliseconds 100
+        while ($true) {
+            Start-Sleep -Milliseconds 200
+            try {
+                if ($presentation.Windows.Count -eq 0) { break }
+            } catch { break }
         }
-    }
-    catch {
-        Write-Host "An error occurred: $_"
-    }
-    finally {
-        if ($presentation -ne $null) { $presentation.Close() }
-        if ($powerpoint -ne $null) { $powerpoint.Quit() }
-        if (Test-Path $tempFile) { Remove-Item $tempFile -Force }
+    } catch {
+        Write-Host "PowerPoint error: $_"
+    } finally {
+        try { if ($null -ne $presentation) { $presentation.Close() } } catch {}
+
+        $empty = $false
+        try {
+            if ($null -eq $powerpoint -or $powerpoint.Presentations.Count -eq 0) { $empty = $true }
+        } catch { $empty = $true }
+
+        if ($empty) {
+            try { if ($null -ne $powerpoint) { $powerpoint.Quit() } } catch {}
+        } else {
+            Write-Host "PowerPoint still has other presentations; not quitting. pid=$pptPid"
+        }
+
+        Remove-TempFileSafe $tempFile
         exit
     }
 }
 else {
     Write-Host "Unsupported file type: $ext"
+    Remove-TempFileSafe $tempFile
 }
