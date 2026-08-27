@@ -13,8 +13,8 @@ This is not the add-in UI. Taskpane, ribbon, and save-to-S3 live in `MY NEW X1 O
 
 | Folder | Product | Role |
 | --- | --- | --- |
-| `officeLuncher` | **Installer** (`MySlice Setup`) | Once as Admin. Deploys launcher, registers `mysliceLTS://`, copies `manifest.xml`, creates Office trusted catalog share. |
-| `mysliceLauncher` | **Protocol handler** (`mysliceLTS.exe`) | Every Document Library **Edit**. Downloads file, puts file UUID in the temp name, opens Word/Excel. |
+| `officeLuncher` | **Installer** (`MySlice Setup`) | Once as Admin. Deploys launcher, registers `mysliceLTS://`, copies `manifest.xml`, creates Office trusted catalog share. - Installer (put script in right places and put all things in right places) |
+| `mysliceLauncher` | **Protocol handler** (`mysliceLTS.exe`) | Every Document Library **Edit**. Downloads file, puts file UUID in the temp name, opens Word/Excel. (application script which download and open the file in the word ) |
 
 ## Local build
 
