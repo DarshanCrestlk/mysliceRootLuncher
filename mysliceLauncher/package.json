@@ -8,7 +8,7 @@
 
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --dir"
+    "build": "node ../scripts/ensure-icon.js && electron-builder --dir"
   },
 
   "devDependencies": {
@@ -19,6 +19,10 @@
   "build": {
     "appId": "com.mysliceLTS.launcher",
     "productName": "mysliceLTS",
+    "electronLanguages": ["en-US"],
+    "directories": {
+      "buildResources": "build"
+    },
 
     "win": {
       "target": "dir",

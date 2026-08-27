@@ -1,8 +1,11 @@
 const { app, BrowserWindow } = require("electron");
 const { exec } = require("child_process");
+const path = require("path");
 
 const PROTOCOL = "mysliceLTS";
-const PS_SCRIPT_PATH = "C:\\ProgramData\\myslice\\mysliceLTS\\launcher\\resources\\myslice.ps1";
+const PS_SCRIPT_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, "myslice.ps1")
+  : path.join(__dirname, "myslice.ps1");
 
 let isQuitting = false;
 let psChildren = 0;

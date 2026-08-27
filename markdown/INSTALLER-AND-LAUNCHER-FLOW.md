@@ -8,7 +8,7 @@ Add-in UI, token bind, and save-to-S3 are documented in:
 
 ---
 
-## Why two Electron apps
+## Why two packages (one Electron app)
 
 MySlice Document Library has no login screen inside Word. The web app is already authenticated. Desktop only needs to:
 
@@ -18,14 +18,16 @@ MySlice Document Library has no login screen inside Word. The web app is already
 
 | App | When | Window | Role |
 | --- | --- | --- | --- |
-| `officeLuncher` | Once, as Administrator | Setup dialog, then quit | Deploy launcher, SMB share, registry, `mysliceLTS://` |
+| `officeLuncher` | Once, as Administrator | NSIS dialogs | Deploy launcher, SMB share, registry, `mysliceLTS://` |
 | `mysliceLauncher` | Every Edit | Hidden (tiny focus-stealer) | Parse protocol URL, run `myslice.ps1`, open Office |
+
+`officeLuncher` is **NSIS only**. It packs the already-built `mysliceLauncher` (one Chromium). It is not a second Electron app.
 
 ---
 
-## Installation (`officeLuncher/main.js`)
+## Installation (`officeLuncher/install.ps1`)
 
-NSIS: `requestedExecutionLevel: requireAdministrator`.
+NSIS: `requestedExecutionLevel: requireAdministrator`. Install dir is `C:\ProgramData\myslice\mysliceLTS\launcher`.
 
 ```mermaid
 sequenceDiagram
@@ -49,7 +51,7 @@ sequenceDiagram
 ### Steps
 
 1. **Deploy launcher**  
-   Packaged `resources/mysliceLauncher` → `C:\ProgramData\myslice\mysliceLTS\launcher\`  
+   NSIS installs `mysliceLTS.exe` to `C:\ProgramData\myslice\mysliceLTS\launcher\`  
    Includes `mysliceLTS.exe` and `resources/myslice.ps1`.
 
 2. **Register `mysliceLTS://`**  
@@ -72,18 +74,14 @@ sequenceDiagram
 
 ## Uninstall
 
-Electron app `officeLuncher/uninstall.js` (same cleanup as install, reversed).
-
-Build:
+NSIS uninstaller (Settings → Apps → **MySlice**). Runs `officeLuncher/uninstall.ps1` then deletes the install dir.
 
 ```bash
 cd officeLuncher
-npm run dist:uninstall
+npm run start:uninstall
 ```
 
-Output: `officeLuncher/dist-uninstall/MySlice Uninstall 1.0.0.exe` — run **as Administrator**.
-
-It removes:
+Run **as Administrator**. It removes:
 
 - process `mysliceLTS.exe` (and `myslice.ps1` PowerShell)
 - SMB share `mysliceLTS`
@@ -91,8 +89,7 @@ It removes:
 - Office trusted catalog `{c77550fc-0d50-495e-be1a-8695539e5d54}`
 - `C:\ProgramData\myslice\mysliceLTS` (and empty `myslice` parent)
 
-Dev: `npm run start:uninstall`  
-Settings → Apps → MySlice → Uninstall runs `MySlice.exe --uninstall --silent` then deletes Program Files.
+Dev: `npm run start:uninstall`
 
 ### What “sideload” means
 
@@ -142,9 +139,8 @@ sequenceDiagram
 5. Strip `mysliceLTS://`, pass remainder to PowerShell.
 6. Quit **only when every PowerShell child has exited** (two Edits → two `myslice.ps1` → EXE stays until the last Office window from this protocol closes).
 
-Hard-coded script path:
-
-`C:\ProgramData\myslice\mysliceLTS\launcher\resources\myslice.ps1`
+Packaged script path: `process.resourcesPath\myslice.ps1`  
+(installed: `C:\ProgramData\myslice\mysliceLTS\launcher\resources\myslice.ps1`)
 
 ### `myslice.ps1`
 
@@ -176,11 +172,13 @@ After open, the add-in runs `tokenInitialization()` → `POST /document-library/
 
 ```text
 rootLuncher/
-  officeLuncher/          # Installer (electron-builder NSIS)
-    main.js
+  officeLuncher/          # NSIS installer (packs prebuilt launcher)
+    install.ps1
+    uninstall.ps1
+    installer.nsh
     manifest.xml          # Copied to ProgramData share (S3 taskpane URLs)
     package.json
-  mysliceLauncher/        # Protocol handler
+  mysliceLauncher/        # Protocol handler (the only Electron app)
     main.js
     myslice.ps1
     package.json

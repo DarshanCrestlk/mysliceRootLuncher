@@ -3,57 +3,47 @@
   "version": "1.0.0",
   "description": "MySlice LTS installer",
   "author": "Your Name or Company",
-  "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "start:uninstall": "electron uninstall.js",
-    "dev": "electron . --inspect=5858",
-    "build": "electron-builder",
-    "dist": "electron-builder --publish=never",
-    "dist:uninstall": "electron-builder --config electron-builder-uninstall.json --publish=never"
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ./install.ps1 -ExePath ../mysliceLauncher/dist/win-unpacked/mysliceLTS.exe -ManifestSource ./manifest.xml -LauncherSource ../mysliceLauncher/dist/win-unpacked",
+    "start:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File ./uninstall.ps1",
+    "dist": "node ./build-installer.js"
   },
   "build": {
     "appId": "com.yourcompany.myslice.installer",
     "productName": "MySlice",
+    "executableName": "mysliceLTS",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
+    "electronVersion": "31.3.1",
+    "forceCodeSigning": false,
+    "npmRebuild": false,
+    "compression": "maximum",
     "defaultArch": "x64",
+    "icon": "icon.ico",
     "win": {
       "target": "nsis",
+      "icon": "icon.ico",
       "requestedExecutionLevel": "requireAdministrator",
-       "icon": "myslice.png"
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": true,
-      "perMachine": false,
+      "perMachine": true,
       "allowElevation": true,
-      "runAfterFinish": true,
+      "runAfterFinish": false,
       "createDesktopShortcut": false,
       "createStartMenuShortcut": false,
       "include": "installer.nsh",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico",
+      "artifactName": "MySlice Setup ${version}.exe",
       "uninstallDisplayName": "MySlice"
-    },
-    "extraResources": [
-      {
-        "from": "../mysliceLauncher/dist/win-unpacked",
-        "to": "mysliceLauncher"
-      },
-      {
-        "from": "manifest.xml",
-        "to": "manifest.xml"
-      },
-      {
-        "from": "myslice.ps1",
-        "to": "myslice.ps1"
-      }
-    ],
-    "files": [
-      "**/*"
-    ]
+    }
   },
   "devDependencies": {
-    "electron": "^39.2.7",
     "electron-builder": "^26.0.12"
   }
 }
