@@ -17,6 +17,8 @@
   <AppDomains>
     <!-- <AppDomain> https://dev-api.slicehr.com</AppDomain> -->
     <AppDomain>https://dev-hrms-api.slicehr.com</AppDomain>
+    <AppDomain>https://dev-seal-api.slicehr.com</AppDomain>
+    <AppDomain>https://dev-ats-api.slicehr.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Document" />
