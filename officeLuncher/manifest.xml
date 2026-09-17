@@ -4,7 +4,7 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
   <Id>7ac86ae0-404b-43c2-b9d9-e6c178dc4b94</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version>
   <ProviderName>myslice</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="myslice" />
@@ -36,6 +36,11 @@
 
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
     xsi:type="VersionOverridesV1_0">
+    <Requirements>
+      <bt:Sets DefaultMinVersion="1.1">
+        <bt:Set Name="RibbonApi" MinVersion="1.1" />
+      </bt:Sets>
+    </Requirements>
     <Hosts>
       <Host xsi:type="Document">
         <Runtimes>
@@ -49,7 +54,7 @@
           </GetStarted>
           <FunctionFile resid="SharedRuntime.Url" />
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <CustomTab id="TabHome">
+            <CustomTab id="TabMyslice">
               <!-- <Group id="CompareGroup">
                 <Label resid="CompareGroup.Label" />
                 <Icon>
@@ -164,7 +169,7 @@
           </GetStarted>
           <FunctionFile resid="SharedRuntime.Url" />
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <CustomTab id="TabHome">
+            <CustomTab id="TabMyslice">
               <!-- Save As New Version -->
               <Group id="SaveAsNewVersionGroup">
                 <Label resid="SaveAsNewVersionGroup.Label" />

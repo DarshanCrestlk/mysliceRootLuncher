@@ -95,6 +95,15 @@ $fileId = Get-QueryValue -RawUrl $url -Key 'file_id'
 $ext = Get-QueryValue -RawUrl $url -Key 'ext'
 $permissions = Get-QueryValue -RawUrl $url -Key 'p'
 $origin = Get-SafeSlug (Get-QueryValue -RawUrl $url -Key 'origin')
+if (-not $origin) {
+    $origin = "myslice-hrms"
+} elseif ($origin -eq "hrms" -or $origin -eq "people") {
+    $origin = "myslice-hrms"
+} elseif ($origin -eq "seal") {
+    $origin = "myslice-seal"
+} elseif ($origin -eq "ats") {
+    $origin = "myslice-ats"
+}
 $downloadUrl = Get-DownloadUrl $url
 $cleanedFileName = Get-SafeBaseName $downloadUrl
 
