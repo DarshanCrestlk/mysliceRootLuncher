@@ -4,6 +4,7 @@ $failed = New-Object System.Collections.Generic.List[string]
 $baseDir = Join-Path $env:PROGRAMDATA "myslice\mysliceLTS"
 $mysliceRoot = Join-Path $env:PROGRAMDATA "myslice"
 $catalogGuid = "c77550fc-0d50-495e-be1a-8695539e5d54"
+$addInId = "7ac86ae0-404b-43c2-b9d9-e6c178dc4b94"
 
 function Write-Step($name, [scriptblock]$action) {
     try {
@@ -45,7 +46,8 @@ Write-Step "Office trusted catalog" {
     $paths = @(
         "HKCU:\Software\Policies\Microsoft\Office\16.0\WEF\TrustedCatalogs\{$catalogGuid}",
         "HKLM:\Software\Policies\Microsoft\Office\16.0\WEF\TrustedCatalogs\{$catalogGuid}",
-        "HKCU:\Software\Microsoft\Office\16.0\WEF\TrustedCatalogs\{$catalogGuid}"
+        "HKCU:\Software\Microsoft\Office\16.0\WEF\TrustedCatalogs\{$catalogGuid}",
+        "HKCU:\SOFTWARE\Microsoft\Office\16.0\WEF\Developer\$addInId"
     )
     foreach ($p in $paths) {
         if (Test-Path $p) {

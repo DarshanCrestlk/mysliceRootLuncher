@@ -111,6 +111,7 @@ Write-Step "Office trusted catalog" {
     $desktopName = $env:COMPUTERNAME
     $shareName = "mysliceLTS"
     $guid = "c77550fc-0d50-495e-be1a-8695539e5d54"
+    $addInId = "7ac86ae0-404b-43c2-b9d9-e6c178dc4b94"
     $regContent = @"
 Windows Registry Editor Version 5.00
 
@@ -118,6 +119,10 @@ Windows Registry Editor Version 5.00
 "Id"="{$guid}"
 "Url"="\\\\$desktopName\$shareName"
 "Flags"=dword:00000001
+
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\WEF\Developer\$addInId]
+"UseDirectDebugger"=dword:00000000
+"UseWebDebugger"=dword:00000000
 "@
     $regFilePath = Join-Path $env:TEMP "MySlice_Trusted_Catalog.reg"
     $regContent | Out-File -FilePath $regFilePath -Encoding Unicode -Force
@@ -127,6 +132,16 @@ Windows Registry Editor Version 5.00
     finally {
         Remove-Item $regFilePath -Force -ErrorAction SilentlyContinue
     }
+}
+
+Write-Step "Office add-in debugger off" {
+    $addInId = "7ac86ae0-404b-43c2-b9d9-e6c178dc4b94"
+    $key = "HKCU:\SOFTWARE\Microsoft\Office\16.0\WEF\Developer\$addInId"
+    if (-not (Test-Path $key)) {
+        New-Item -Path $key -Force | Out-Null
+    }
+    New-ItemProperty -Path $key -Name "UseDirectDebugger" -Value 0 -PropertyType DWord -Force | Out-Null
+    New-ItemProperty -Path $key -Name "UseWebDebugger" -Value 0 -PropertyType DWord -Force | Out-Null
 }
 
 if ($failed.Count -gt 0) {

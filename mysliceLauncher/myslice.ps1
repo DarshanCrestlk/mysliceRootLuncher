@@ -2,6 +2,22 @@ param (
     [string]$url
 )
 
+function Disable-OfficeAddinWebViewDebugger {
+    $addInId = "7ac86ae0-404b-43c2-b9d9-e6c178dc4b94"
+    $key = "HKCU:\SOFTWARE\Microsoft\Office\16.0\WEF\Developer\$addInId"
+    try {
+        if (-not (Test-Path $key)) {
+            New-Item -Path $key -Force | Out-Null
+        }
+        New-ItemProperty -Path $key -Name "UseDirectDebugger" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $key -Name "UseWebDebugger" -Value 0 -PropertyType DWord -Force | Out-Null
+    } catch {
+        Write-Host "Could not disable Office add-in debugger: $_"
+    }
+}
+
+Disable-OfficeAddinWebViewDebugger
+
 function Get-QueryValue {
     param(
         [string]$RawUrl,
